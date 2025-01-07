@@ -1,55 +1,155 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import status, viewsets, generics
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, IsAdminUser
 from .models import User, Project, Vote, AuditLog
-from .serializers import UserSerializer, ProjectSerializer, VoteSerializer, AuditLogSerializer
+from .permissions import IsOwner
+from .serializers import ProjectSerializer, VoteSerializer, AuditLogSerializer
 
 # Widok dla listy projektów i tworzenia projektów
-class ProjectListView(APIView):
-    def get(self, request):
-        projects = Project.objects.all()
-        serializer = ProjectSerializer(projects, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        if not request.user.is_admin:
-            return Response({"error": "Only admins can create projects"}, status=status.HTTP_403_FORBIDDEN)
-
-        data = request.data
-        data['created_by'] = request.user.id
-        serializer = ProjectSerializer(data=data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# Widok dla głosowania
-class VoteView(APIView):
-    def post(self, request):
-        user = request.user
-        project_id = request.data.get('project_id')
-
-        try:
-            project = Project.objects.get(id=project_id)
-        except Project.DoesNotExist:
-            return Response({"error": "Project not found"}, status=status.HTTP_404_NOT_FOUND)
-
-        if Vote.objects.filter(user=user, project=project).exists():
-            return Response({"error": "You have already voted for this project"}, status=status.HTTP_400_BAD_REQUEST)
-
-        vote = Vote.objects.create(user=user, project=project)
-        return Response({"message": "Vote recorded", "vote_id": vote.id}, status=status.HTTP_201_CREATED)
+# class ProjectListView(APIView):
+#     def get(self, request):
+#         projects = Project.objects.all()
+#         serializer = ProjectSerializer(projects, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+#
+#     def post(self, request):
+#         # if not request.user.is_admin:
+#         #     return Response({"error": "Only admins can create projects"}, status=status.HTTP_403_FORBIDDEN)
+#
+#         data = request.data
+#         data['created_by'] = request.user.id
+#         serializer = ProjectSerializer(data=data)
+#
+#         if serializer.is_valid(raise_exception=True):
+#             serializer.save()
+#             return Response({'post': serializer.data})
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Widok dla logów audytu
-class AuditLogView(APIView):
-    def get(self, request):
-        if not request.user.is_admin:
-            return Response({"error": "Only admins can view audit logs"}, status=status.HTTP_403_FORBIDDEN)
+"""
+================AdminOnly================
+"""
+class ProjectViewSet(viewsets.ModelViewSet):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAdminUser]
 
-        logs = AuditLog.objects.all()
-        serializer = AuditLogSerializer(logs, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class VoteViewSet(viewsets.ModelViewSet):
+    queryset = Vote.objects.all()
+    serializer_class = VoteSerializer
+    permission_classes = [IsAdminUser]
+
+class AuditLogViewSet(viewsets.ModelViewSet):
+    queryset = AuditLog.objects.all()
+    serializer_class = AuditLogSerializer
+    permission_classes = [IsAdminUser]
+
+
+
+"""
+================Lists read only================
+"""
+class ProjectAPIList(generics.ListAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+class VoteAPIList(generics.ListAPIView):
+    queryset = Vote.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAdminUser]
+
+class AuditAPIList(generics.ListAPIView):
+    queryset = AuditLog.objects.all()
+    serializer_class = AuditLogSerializer
+    permission_classes = [IsAdminUser]
+
+
+
+
+"""
+================single model instance read only================
+"""
+
+class ProjectAPIRetrieve(generics.RetrieveAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+class VoteAPIRetrieve(generics.RetrieveAPIView):
+    queryset = Vote.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAdminUser]
+
+class AuditAPIRetrieve(generics.RetrieveAPIView):
+    queryset = AuditLog.objects.all()
+    serializer_class = AuditLogSerializer
+    permission_classes = [IsAdminUser]
+
+
+
+
+"""
+================single model instance read only================
+"""
+
+class ProjectAPIRetrieve(generics.RetrieveAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+class VoteAPIRetrieve(generics.RetrieveAPIView):
+    queryset = Vote.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAdminUser]
+
+class AuditAPIRetrieve(generics.RetrieveAPIView):
+    queryset = AuditLog.objects.all()
+    serializer_class = AuditLogSerializer
+    permission_classes = [IsAdminUser]
+
+
+
+
+"""
+================single model instance delete only================
+"""
+class ProjectAPIDestroy(generics.DestroyAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    # permission_classes = [IsAuthenticated, IsOwner]
+
+
+
+
+
+
+
+"""
+================single model instance create-only================
+"""
+
+
+class ProjectAPICreate(generics.CreateAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class VoteAPICreate(generics.CreateAPIView):
+    queryset = Project.objects.all()
+    serializer_class = VoteSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class ProjectAPIUpdate(generics.RetrieveAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+
+
+class ProjectAPIDestroy(generics.RetrieveDestroyAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAdminUser,]
+
