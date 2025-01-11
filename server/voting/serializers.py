@@ -1,14 +1,15 @@
 from rest_framework import serializers
 from .models import User, Project, Vote, AuditLog
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'is_admin', 'PESEL', 'created_at']
+# class UserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['id', 'username', 'email', 'is_admin', 'PESEL', 'created_at']
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-    created_by = UserSerializer(read_only=True)
+    created_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
 
     class Meta:
         model = Project
@@ -16,7 +17,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
 class VoteSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     project = ProjectSerializer(read_only=True)
 
     class Meta:
@@ -25,8 +26,8 @@ class VoteSerializer(serializers.ModelSerializer):
 
 
 class AuditLogSerializer(serializers.ModelSerializer):
-    performed_by = UserSerializer(read_only=True)
-
+    performed_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    #performed_by = UserSerializer(read_only=True)
     class Meta:
         model = AuditLog
         fields = ['id', 'action', 'performed_by', 'details', 'created_at']

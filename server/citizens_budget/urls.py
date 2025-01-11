@@ -17,7 +17,36 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from rest_framework import routers
+
+from voting.views import *
+
+router = routers.DefaultRouter()
+router.register(r'admin/projects', ProjectViewSet)
+router.register(r'admin/votes', VoteViewSet)
+router.register(r'admin/logs', AuditLogViewSet)
+print(router.urls)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('voting.urls')),
+    path('api/drf-auth/', include('rest_framework.urls')),
+    path('api/', include(router.urls)), # http://127.0.0.1:8000/api/projects
+
+    path('api/projects/', ProjectAPIList.as_view()),
+    path('api/votes/', VoteAPIList.as_view()),
+    path('api/logs/', AuditAPIList.as_view()),
+
+    path('api/projects/<int:pk>/', ProjectAPIRetrieve.as_view()),
+    path('api/votes/<int:pk>/', VoteAPIRetrieve.as_view()),
+    path('api/logs/<int:pk>/', AuditAPIRetrieve.as_view()),
+
+    path('api/projectdelete/<int:pk>/', ProjectAPIDestroy.as_view()),
+
+    path('api/projectcreate/', ProjectAPICreate.as_view()),
+    path('api/vote/', VoteAPICreate.as_view()),
+
+
 ]
+
+# path('api/projects/<int:pk>/', ProjectAPIUpdate.as_view()),
+# path('api/projectsdelete/<int:pk>/', ProjectAPIDestroy.as_view())
