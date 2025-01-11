@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-
+from .database_router import PrimaryReplicaRouter
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -81,15 +81,27 @@ WSGI_APPLICATION = 'citizens_budget.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    "default": {},
+    "primary": {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('POSTGRES_DB'),
         'USER': os.getenv('POSTGRES_USER'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
         'HOST': os.getenv('POSTGRES_HOST'),
         'PORT': os.getenv('POSTGRES_PORT'),
+    },
+    "replica1": {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_SLAVE_DB'),
+        'USER': os.getenv('POSTGRES_SLAVE_USER'),
+        'PASSWORD': os.getenv('POSTGRES_SLAVE_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_SLAVE_HOST'),
+        'PORT': os.getenv('POSTGRES_SLAVE_PORT'),
     }
 }
+
+DATABASE_ROUTERS = [PrimaryReplicaRouter]
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

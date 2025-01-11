@@ -29,6 +29,7 @@ print(router.urls)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
     path('api/drf-auth/', include('rest_framework.urls')),
     path('api/', include(router.urls)), # http://127.0.0.1:8000/api/projects
 
