@@ -6,17 +6,17 @@ from citizens_budget import settings
 
 class PrimaryReplicaRouter:
 
-    def is_primary_healthy(self):
+    def is_default_healthy(self):
         """
         Check if the replica database is available.
         """
         try:
             conn = psycopg2.connect(
-                dbname=settings.DATABASES['primary']['NAME'],
-                user=settings.DATABASES['primary']['USER'],
-                password=settings.DATABASES['primary']['PASSWORD'],
-                host=settings.DATABASES['primary']['HOST'],
-                port=settings.DATABASES['primary']['PORT'],
+                dbname=settings.DATABASES['default']['NAME'],
+                user=settings.DATABASES['default']['USER'],
+                password=settings.DATABASES['default']['PASSWORD'],
+                host=settings.DATABASES['default']['HOST'],
+                port=settings.DATABASES['default']['PORT'],
             )
             conn.close()
             return True
@@ -24,25 +24,25 @@ class PrimaryReplicaRouter:
             return False
     def db_for_read(self, model, **hints):
         """
-        Directs read operations to the primary if available; fallback to replica1 otherwise.
+        Directs read operations to the default if available; fallback to replica1 otherwise.
         """
-        if self.is_primary_healthy():
-            return 'primary'
+        if self.is_default_healthy():
+            return 'default'
         else:
             return 'replica1'
 
     def db_for_write(self, model, **hints):
         """
-        Writes always go to primary.
+        Writes always go to default.
         """
-        return "primary"
+        return "default"
 
     def allow_relation(self, obj1, obj2, **hints):
         """
         Relations between objects are allowed if both objects are
-        in the primary/replica pool.
+        in the default/replica pool.
         """
-        db_set = {"primary", "replica1"}
+        db_set = {"default", "replica1"}
         if obj1._state.db in db_set and obj2._state.db in db_set:
             return True
         return None
