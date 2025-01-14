@@ -39,13 +39,17 @@ services:
       PGPASSWORD: ${POSTGRES_SLAVE_PASSWORD}
     command: |
       bash -c "
-      until pg_basebackup --pgdata=/var/lib/postgresql/data -R --slot=replication_slot --host=master --port=5432
-      do
-      echo 'Waiting for primary to connect...'
-      sleep 1s
-      done
-      echo 'Backup done, starting replica...'
-      chmod 0700 /var/lib/postgresql/data
+      if [ ! -d /var/lib/postgresql/data ] || [ ! \"\$(ls -A /var/lib/postgresql/data)\" ];  
+      then
+        echo 'Initializing replica...'
+        until pg_basebackup --pgdata=/var/lib/postgresql/data -R --slot=replication_slot --host=master --port=5432
+        do
+          echo 'Waiting for primary to connect...'
+          sleep 1s
+        done
+        echo 'Backup done, starting replica...'
+        chmod 0700 /var/lib/postgresql/data      
+      fi
       postgres
       "
     depends_on:
