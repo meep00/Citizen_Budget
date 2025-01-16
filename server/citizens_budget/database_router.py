@@ -26,10 +26,7 @@ class PrimaryReplicaRouter:
         """
         Directs read operations to the default if available; fallback to replica1 otherwise.
         """
-        if self.is_default_healthy():
-            return 'default'
-        else:
-            return 'replica1'
+        return "replica1"
 
     def db_for_write(self, model, **hints):
         """
