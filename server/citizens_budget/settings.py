@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 ENV_FILE = BASE_DIR.parent / '.env'
+PATH_TO_CA_CERT = BASE_DIR.parent / 'certs/ca.crt'
 load_dotenv(ENV_FILE)
 
 # Quick-start development settings - unsuitable for production
@@ -88,6 +89,10 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
         'HOST': os.getenv('POSTGRES_HOST'),
         'PORT': os.getenv('POSTGRES_PORT'),
+        'OPTIONS': {
+            'sslmode': 'require',
+            'sslrootcert': PATH_TO_CA_CERT,
+        }
     },
     "replica1": {
         'ENGINE': 'django.db.backends.postgresql',

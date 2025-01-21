@@ -20,8 +20,13 @@ services:
       -c wal_level=replica
       -c max_wal_senders=10 
       -c max_replication_slots=10
+      -c ssl=on
+      -c ssl_cert_file=/var/lib/postgresql/certs/server.crt
+      -c ssl_key_file=/var/lib/postgresql/certs/server.key
+      -c ssl_ca_file=/var/lib/postgresql/certs/ca.crt
 
     volumes:
+      - ./certs:/var/lib/postgresql/certs
       - ./initdb/master/init-master.sh:/docker-entrypoint-initdb.d/init-master.sh
       - master_data:/var/lib/postgresql/data
 
