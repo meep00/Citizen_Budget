@@ -2,7 +2,10 @@ version: '3.8'
 
 services:
   master:
-    image: postgres:14-alpine
+#    image: postgres:14-alpine
+    "build": {
+      "dockerfile": "Dockerfile"
+    }
     container_name: master
 #    user: postgres
     restart: always
@@ -16,8 +19,8 @@ services:
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
       PGOPTIONS: "-c postgres.slave.user=${POSTGRES_SLAVE_USER} -c postgres.slave.password=${POSTGRES_SLAVE_PASSWORD}"
     command: |
-      postgres
-      -c wal_level=replica
+      postgres 
+      -c wal_level=replica 
       -c max_wal_senders=10 
       -c max_replication_slots=10
       -c ssl=on
@@ -26,8 +29,7 @@ services:
       -c ssl_ca_file=/var/lib/postgresql/certs/ca.crt
 
     volumes:
-      - ./certs:/var/lib/postgresql/certs
-      - ./initdb/master/init-master.sh:/docker-entrypoint-initdb.d/init-master.sh
+      - ./certs:/var/lib/postgresql/certs_export
       - master_data:/var/lib/postgresql/data
 
 

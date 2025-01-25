@@ -26,3 +26,6 @@ BEGIN
 END;
 \$\$;
 EOSQL
+
+
+cp -r /var/lib/postgresql/certs/* /var/lib/postgresql/certs_export/
