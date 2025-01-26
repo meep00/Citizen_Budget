@@ -8,18 +8,20 @@ RUN mkdir -p /var/lib/postgresql/certs /var/lib/postgresql/certs_export && \
 
 USER postgres
 
+ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
 RUN openssl req -new -x509 -days 365 -nodes \
     -out /var/lib/postgresql/certs/server.crt \
     -keyout /var/lib/postgresql/certs/server.key \
-    -subj "/C=US/ST=State/L=City/O=Organization/OU=OrgUnit/CN=localhost" && \
+    -subj "/C=US/ST=State/L=City/O=Organization/OU=OrgUnit/CN=$(date +%s)" && \
     chmod 0600 /var/lib/postgresql/certs/server.key && \
     chmod 0644 /var/lib/postgresql/certs/server.crt
 
 
+ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
 RUN openssl req -new -nodes -x509 -days 365 \
     -keyout /var/lib/postgresql/certs/ca.key \
     -out /var/lib/postgresql/certs/ca.crt \
-    -subj "/C=US/ST=State/L=City/O=Organization/OU=OrgUnit/CN=CA" && \
+    -subj "/C=US/ST=State/L=City/O=Organization/OU=OrgUnit/CN=$(date +%s)" && \
     chmod 0600 /var/lib/postgresql/certs/ca.key && \
     chmod 0644 /var/lib/postgresql/certs/ca.crt
 

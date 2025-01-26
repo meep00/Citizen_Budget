@@ -91,10 +91,8 @@ DATABASES = {
         'PORT': os.getenv('POSTGRES_PORT'),
         'OPTIONS': {
             'sslmode': 'require',
-            'sslrootcert': PATH_TO_CA_CERT / 'ca.crt',
-            'sslcert': PATH_TO_CA_CERT / 'server.crt',
-            'sslkey': PATH_TO_CA_CERT / 'server.key',
-        },
+            'sslrootcert': PATH_TO_CA_CERT / 'certs/master/server.crt',
+        }
     },
     "replica1": {
         'ENGINE': 'django.db.backends.postgresql',
@@ -103,6 +101,10 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
         'HOST': os.getenv('POSTGRES_HOST'),
         'PORT': os.getenv('POSTGRES_SLAVE_PORT'),
+        'OPTIONS': {
+            'sslmode': 'require',
+            'sslrootcert': PATH_TO_CA_CERT / 'certs/slave/server.crt',
+        }
     }
 }
 
