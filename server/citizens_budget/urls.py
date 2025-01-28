@@ -46,6 +46,8 @@ urlpatterns = [
     path('api/projectcreate/', ProjectAPICreate.as_view()),
     path('api/vote/', VoteAPICreate.as_view()),
 
+    path('', include('voting.urls')),
+
 
 ]
 

@@ -6,26 +6,29 @@ from .models import User, Project, Vote, AuditLog
 from .permissions import IsOwner
 from .serializers import ProjectSerializer, VoteSerializer, AuditLogSerializer
 
-# Widok dla listy projektów i tworzenia projektów
-# class ProjectListView(APIView):
-#     def get(self, request):
-#         projects = Project.objects.all()
-#         serializer = ProjectSerializer(projects, many=True)
-#         return Response(serializer.data, status=status.HTTP_200_OK)
-#
-#     def post(self, request):
-#         # if not request.user.is_admin:
-#         #     return Response({"error": "Only admins can create projects"}, status=status.HTTP_403_FORBIDDEN)
-#
-#         data = request.data
-#         data['created_by'] = request.user.id
-#         serializer = ProjectSerializer(data=data)
-#
-#         if serializer.is_valid(raise_exception=True):
-#             serializer.save()
-#             return Response({'post': serializer.data})
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+from django.http import JsonResponse
+from django.db import connection
+def find_user_by_username(username):
+    with connection.cursor() as cursor:
+        # Уязвимый SQL-запрос
+        query = f"SELECT * FROM auth_user WHERE username = '{username}';"
+        cursor.execute(query)
+        return cursor.fetchall()
+#http://127.0.0.1:8000/vulnerable/?username=admin' OR '1'='1
+
+
+def vulnerable_view(request):
+    username = request.GET.get("username", "")
+    if username:
+        try:
+            # Используем уязвимую функцию
+            result = find_user_by_username(username)
+            return JsonResponse({"result": result})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    else:
+        return JsonResponse({"error": "Please provide a username as ?username=..."}, status=400)
 
 """
 ================AdminOnly================
