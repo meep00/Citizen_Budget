@@ -1,0 +1,9 @@
+FROM alpine:latest
+
+RUN apk update && apk add --no-cache postgresql-client bash
+
+COPY backup-cron.sh /backup-cron.sh
+COPY crontab /etc/crontabs/root
+RUN chmod +x /backup-cron.sh
+
+CMD ["crond", "-f", "-d", "8"]

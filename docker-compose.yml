@@ -83,6 +83,21 @@ services:
     volumes:
       - ./certs/slave:/var/lib/postgresql/certs_export
 
+  backup:
+    "build": {
+      "dockerfile": "Dockerfile_backup"
+    }
+    container_name: backup
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - ./backups:/backups
+    entrypoint: ["/bin/sh", "-c", "crond -f -d 8"]
+
+
 
 volumes:
   master_data:
